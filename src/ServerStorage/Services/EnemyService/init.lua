@@ -51,8 +51,6 @@ function EnemyService:KnitInit()
     for _, model in ipairs(CollectionService:GetTagged(ENEMY_TAG)) do
         EnemyService:NewEnemy(model)
     end
-
-    
 end
 
 
