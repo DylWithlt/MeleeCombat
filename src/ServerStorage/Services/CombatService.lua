@@ -22,12 +22,18 @@ local function weldBetween(a, b)
     return weld
 end
 
-function CombatService:Equip(char)
+function CombatService.Client:Equip(player)
+    local char = player.Character
+    if not char then return end
+
+    local lastSword = char:FindFirstChild(Shusui.Name)
+    if lastSword then lastSword:Destroy() end
+
     local rightHand = char:FindFirstChild("RightHand")
     if not rightHand then return end
 
     local sword = Shusui:Clone()
-    for _,part in ipairs(sword:GetChildren()) do
+    for _, part in ipairs(sword:GetChildren()) do
         if not part:IsA("BasePart") or part == sword.PrimaryPart then continue end
 
         weldBetween(sword.PrimaryPart, part)
@@ -39,40 +45,31 @@ function CombatService:Equip(char)
     sword.Parent = char
 end
 
-function CombatService:Unequip(sword)
-    sword:Destroy()
-end
-
-function CombatService.Client:ToggleEquip(player)
-    print("E Down")
-    
+function CombatService.Client:Unequip(player)
     local char = player.Character
     if not char then return end
-
-    local sword = char:FindFirstChild(Shusui.Name)
-    if sword then
-        CombatService:Unequip(sword)
-    else
-        CombatService:Equip(char)
-    end
-end
-
-function CombatService:KnitStart()
     
+    local lastSword = char:FindFirstChild(Shusui.Name)
+    if lastSword then lastSword:Destroy() end
 end
 
 function CombatService:InitializeChar(char)
     local lowerTorso = char:FindFirstChild("LowerTorso")
     if not lowerTorso then return end
-    
+
     local _sheathe = Sheathe:Clone()
     _sheathe:SetPrimaryPartCFrame(lowerTorso.CFrame
-        * CFrame.new(-(lowerTorso.Size.X/2 + _sheathe.PrimaryPart.Size.Z/2), .25, -.25)
-        * CFrame.Angles(math.rad(20), -math.rad(90), 0))
-    weldBetween(_sheathe.PrimaryPart, lowerTorso)
+        * CFrame.new(-(lowerTorso.Size.X/2 + _sheathe.PrimaryPart.Size.Z/2), 0, 0)
+        * CFrame.Angles(0, math.rad(90), 0))
+
+    local motor6d = Instance.new("Motor6D")
+    motor6d.Part0 = lowerTorso
+    motor6d.Part1 = _sheathe.PrimaryPart
+    motor6d.C0 = lowerTorso.CFrame:inverse() * _sheathe.PrimaryPart.CFrame
+    motor6d.Parent = lowerTorso
+
     _sheathe.Parent = char
 end
-
 
 function CombatService:KnitInit()
     Players.PlayerAdded:Connect(function(player)
